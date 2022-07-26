@@ -1,43 +1,4 @@
-// OUTLINE
-// 1.  Webpage will have the following:
-//     *  Dropdown that will allow selection of a name/id
-//     *  Horizontal bar chart that shows data related to only the id
-//     *  Bubble chart shows data related only to id
-//     *  Summary section that only shows data related to id
-// 2.  So every graphic is needs the id and the only part that is independent is the dropdown
-// 3.  The dropdown has many options so it needs created dynamically based on what is in the data file
-// 4.  The page will load with a default selected id but needs to update based on the dropdown selection
-//     *  This tells me that I need to run code once and then same code again with only an id change.
-//     *  Thi sounds like a good time to use a function like  `createPlot(id)`
-// 5.  Note:  The html already has several things built-in:
-//     a.  you are given empty divs with ids called:
-//         *  `selDataset` ==> used for the dropdown
-//         *  `sample-metadata` ==> used for the summary data section
-//         *  `bar` ==> used for the horizontal bar chrt
-//         *  `gauge` ==> (optional) used for gauge chart
-//         *  `bubble` ==> used for bubble chart
-//     b.  There is an inline event handler in the html.  It looks like this:
-//         `<select id="selDataset" onchange="optionChanged(this.value)"></select>`
-//         This line of code is part of the dropdown, aka in html terms a `select`
-//         If you look up the code for a select it is made up of options (dropdown entries)
-//         and values associated with each option.  The value for the select is based on what option is selected.
-//         i.e.  Dropdown has selected 'Subject 940' and maybe the value associated with this is `940`.
-//               The '940' is captured by using 'this.value'... So 'this.value' captures the current selection value.
-//               The 'optionChanged()' is a function that you need to make in your app.js that updates
-//               some type of data filter that filters the data only related to '940' and then that 
-//               data is used in all the charts.
-//     c.  On Day 3 we will cover event handlers from the js file but we do not cover inline event handlers in the html.  
-//         The only differene is where we call them but otherwise they work the same.
-//     d.  You already have the data connected - notice the names list matches the id's used in the 
-//         other data structures below.  Inspect the data - there are several sections - which one would 
-//         be used for each chart.  Look at the images in the readme and matchup the data.  There is not
-//         much that needs done except filtering and ordering of the existing data.
-
-
-
-// SAMPLE STRUCTURE
-// 1.  Check inspector console to see if each function is running on page load
-
+// data source
 const url = "https://2u-data-curriculum-team.s3.amazonaws.com/dataviz-classroom/v1.1/14-Interactive-Web-Visualizations/02-Homework/samples.json";
 
 // function that contains instructions at page load/refresh
@@ -50,10 +11,8 @@ function init(){
     
     // loading data
     d3.json(url).then((data)=> {
-    
         // check the data
         console.log(data.names)
-
         let selector = d3.select('#selDataset');
         selector.html("")
 
@@ -63,7 +22,6 @@ function init(){
             selOptions.property("value", data.names[i]);
             selOptions.text(`OTU ${data.names[i]}`);
         }
-            // plots functions
             createScatter('940')
             createBar('940')
             createSummary('940')
@@ -95,9 +53,8 @@ function createScatter(id){
         };
         let bdata = [trace1];
         let layout = {
-            title: "Bacterias",
-            xaxis: {title: "OTU"},
-            yaxis: {title: " Amount"}
+            title: "Microbes",
+            xaxis: {title: "OTU"}
         };
 
         Plotly.newPlot('bubble', bdata, layout);
@@ -109,10 +66,27 @@ function createScatter(id){
 
 // start of bar chart
 function createBar(id){
-    
+    d3.json(url).then((data) => {
+        let myData = data.samples.filter(i => i.id == id)
+        let trace = {
+            y: myData[0].otu_ids.slice(0, 10).map(i => `OTU ${i}`).reverse(),
+            x: myData[0].sample_values.slice(0, 10).reverse(),
+            text: myData[0].otu_labels.slice(0, 10).reverse(),
+            type: "bar",
+            orientation: "h"
+        };
+        let barData = [trace];
+
+        let barLayout = {
+            title: "top 10 OTUs",
+        };
+
+        Plotly.newPlot('bar', barData, barLayout);
+    });
     console.log(`This function generates bar chart of ${id} `)
 
 }
+// end of bar
 
 // summary start
 function createSummary(id){
