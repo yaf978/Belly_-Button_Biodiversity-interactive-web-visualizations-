@@ -53,7 +53,7 @@ function init(){
     
         // check the data
         console.log(data.names)
-        
+
         let selector = d3.select('#selDataset');
         selector.html("")
 
@@ -71,23 +71,19 @@ function init(){
 }
 // end of init function
 
-// function that runs whenever the dropdown is changed
-// this function is in the HTML and is called with an input called 'this.value'
-// that comes from the select element (dropdown)
+
 function optionChanged(newID){
     // code that updates graphics
     // one way is to recall each function
     createScatter(newID)
     createBar(newID)
     createSummary(newID)
-
 }
+
 // start of scatter chart
 function createScatter(id){
     d3.json(url).then((data) => {
-        // code for scatter plot goes here
         let myData = data.samples.filter(i => i.id == id)[0]
-
         let trace1 = {
             x: myData.otu_ids,
             y: myData.sample_values,
@@ -98,11 +94,10 @@ function createScatter(id){
             }
         };
         let bdata = [trace1];
-
         let layout = {
             title: "Bacterias",
             xaxis: {title: "OTU"},
-            yaxis: {title: " Value"}
+            yaxis: {title: " Amount"}
         };
 
         Plotly.newPlot('bubble', bdata, layout);
@@ -119,29 +114,25 @@ function createBar(id){
 
 }
 
+// summary start
 function createSummary(id){
-    // code that makes list, paragraph, text/linebreaks at id='sample-meta'
-
-    // checking to see if function is running
+    d3.json(url).then((data) => {
+        let myData = data.metadata.filter(i => i.id == id)[0]
+        console.log(myData)
+        let summary = d3.select('#sample-metadata');
+        summary.html("")
+        Object.entries(myData).forEach(([k, v]) => {
+        summary.append("p").text(`${k}:${v}`)    
+        })
+    })
     console.log(`This function generates summary info of ${id} `)
 }
+// summary ends
 
 
-// function called, runs init instructions
-// runs only on load and refresh of browser page
 init()
 
 
 
 
 
-// STRATEGIES
-// 1.  Inside-Out:  Generate each chart by assuming an ID/name then refactor the code to 
-//                  work for any ID/name coming from the function.  I typically do this practice.
-// 2.  Outside-In:  Generate the control (dropdown) and how the control interacts with the other parts.
-//                  I gave you the basics of how it interacts above.  You could generate the dropdown
-//                  and then see in the console the ID/names update as you make a change.  Then you could
-//                  make your chart code.
-
-// Overall, the above are the two steps you need to do (1.  Make plots with data, 2. make dropdown that passes id to functions)
-// You could do it in either order.
