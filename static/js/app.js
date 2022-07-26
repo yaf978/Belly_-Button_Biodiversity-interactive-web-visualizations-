@@ -38,24 +38,38 @@
 // SAMPLE STRUCTURE
 // 1.  Check inspector console to see if each function is running on page load
 
+const url = "https://2u-data-curriculum-team.s3.amazonaws.com/dataviz-classroom/v1.1/14-Interactive-Web-Visualizations/02-Homework/samples.json";
 
 // function that contains instructions at page load/refresh
 // function does not run until called
+// start of init
 function init(){
-    // code that runs once (only on page load or refresh)
-
+   
     // this checks that our initial function runs.
     console.log("The Init() function ran")
+    
+    // loading data
+    d3.json(url).then((data)=> {
+    
+        // check the data
+        console.log(data.names)
+        
+        let selector = d3.select('#selDataset');
+        selector.html("")
 
-    // create dropdown/select
-
-
-    // run functions to generate plots
-    createScatter('940')
-    createBar('940')
-    createSummary('940')
-
+        // create dropdown/select
+        for (let i=0; i<data.names.length; i++){
+            let selOptions = selector.append("option")
+            selOptions.property("value", data.names[i]);
+            selOptions.text(`OTU ${data.names[i]}`);
+        }
+            // plots functions
+            createScatter('940')
+            createBar('940')
+            createSummary('940')
+    })
 }
+// end of init function
 
 // function that runs whenever the dropdown is changed
 // this function is in the HTML and is called with an input called 'this.value'
@@ -68,18 +82,39 @@ function optionChanged(newID){
     createSummary(newID)
 
 }
-
+// start of scatter chart
 function createScatter(id){
-    // code that makes scatter plot at id='bubble'
+    d3.json(url).then((data) => {
+        // code for scatter plot goes here
+        let myData = data.samples.filter(i => i.id == id)[0]
 
-    // checking to see if function is running
+        let trace1 = {
+            x: myData.otu_ids,
+            y: myData.sample_values,
+            mode: "markers",
+            marker: {
+                color: myData.otu_ids,
+                size: myData.sample_values
+            }
+        };
+        let bdata = [trace1];
+
+        let layout = {
+            title: "Bacterias",
+            xaxis: {title: "OTU"},
+            yaxis: {title: " Value"}
+        };
+
+        Plotly.newPlot('bubble', bdata, layout);
+    });
+    
     console.log(`This function generates scatter plot of ${id} `)
 }
+// end of scatter plot
 
+// start of bar chart
 function createBar(id){
-    // code that makes bar chart at id='bar'
-
-    // checking to see if function is running
+    
     console.log(`This function generates bar chart of ${id} `)
 
 }
